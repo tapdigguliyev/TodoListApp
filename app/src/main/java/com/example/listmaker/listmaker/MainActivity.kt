@@ -12,8 +12,8 @@ import com.example.listmaker.listmaker.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-
     private lateinit var todoListRecyclerView: RecyclerView
+    private val listDataManager = ListDataManager(this)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,9 +21,10 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val lists = listDataManager.readLists()
         todoListRecyclerView = findViewById(R.id.rvTodoList)
         todoListRecyclerView.layoutManager = LinearLayoutManager(this)
-        todoListRecyclerView.adapter = TodoListAdapter()
+        todoListRecyclerView.adapter = TodoListAdapter(lists)
 
         binding.fabCreate.setOnClickListener {
             showCreateTodoListDialog()
@@ -40,7 +41,9 @@ class MainActivity : AppCompatActivity() {
         builder.setView(todoTitleEditText)
         builder.setPositiveButton(getString(R.string.create_list)) {
                 dialog, _ ->
-            adapter.addNewItem(todoTitleEditText.text.toString())
+            val list = TaskList(todoTitleEditText.text.toString())
+            listDataManager.saveLists(list)
+            adapter.addList(list)
             dialog.dismiss()
         }
         builder.create().show()

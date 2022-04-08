@@ -6,17 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class TodoListAdapter() : RecyclerView.Adapter<TodoListAdapter.TodoListViewHolder>() {
-    private var todoLists = mutableListOf("Android development", "House Work", "Errands", "Shopping")
-
-    fun addNewItem(listItem: String) {
-        if (listItem.isEmpty()) {
-            todoLists.add("Todo list " + (todoLists.size + 1))
-        } else {
-            todoLists.add(listItem)
-        }
-        notifyDataSetChanged()
-    }
+class TodoListAdapter(private val lists: ArrayList<TaskList>) : RecyclerView.Adapter<TodoListAdapter.TodoListViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoListViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -25,14 +15,19 @@ class TodoListAdapter() : RecyclerView.Adapter<TodoListAdapter.TodoListViewHolde
     }
 
     override fun onBindViewHolder(holder: TodoListViewHolder, position: Int) {
-        holder.itemNumber.text = (position + 1).toString()
-        holder.itemString.text = todoLists[position]
+        (position + 1).toString().also { holder.itemNumber.text = it }
+        holder.itemString.text = lists[position].name
     }
 
-    override fun getItemCount() = todoLists.size
+    override fun getItemCount() = lists.size
 
     inner class TodoListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val itemNumber : TextView = itemView.findViewById(R.id.itemNumber)
         val itemString : TextView = itemView.findViewById(R.id.itemString)
+    }
+
+    fun addList(list: TaskList) {
+        lists.add(list)
+        notifyItemInserted(lists.size - 1)
     }
 }
