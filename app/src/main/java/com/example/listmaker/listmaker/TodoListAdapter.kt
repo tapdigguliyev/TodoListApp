@@ -7,7 +7,16 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class TodoListAdapter() : RecyclerView.Adapter<TodoListAdapter.TodoListViewHolder>() {
-    var todoLists = arrayOf("Android development", "House Work", "Errands", "Shopping")
+    private var todoLists = mutableListOf("Android development", "House Work", "Errands", "Shopping")
+
+    fun addNewItem(listItem: String) {
+        if (listItem.isEmpty()) {
+            todoLists.add("Todo list " + (todoLists.size + 1))
+        } else {
+            todoLists.add(listItem)
+        }
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoListViewHolder {
         val view = LayoutInflater.from(parent.context)
