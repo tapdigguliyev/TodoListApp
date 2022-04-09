@@ -1,5 +1,6 @@
 package com.example.listmaker.listmaker
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
 import android.widget.EditText
@@ -9,12 +10,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.listmaker.listmaker.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), TodoListAdapter.TodoListClickListener {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var todoListRecyclerView: RecyclerView
     private val listDataManager = ListDataManager(this)
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         val lists = listDataManager.readLists()
         todoListRecyclerView = findViewById(R.id.rvTodoList)
         todoListRecyclerView.layoutManager = LinearLayoutManager(this)
-        todoListRecyclerView.adapter = TodoListAdapter(lists)
+        todoListRecyclerView.adapter = TodoListAdapter(lists, this)
 
         binding.fabCreate.setOnClickListener {
             showCreateTodoListDialog()
@@ -45,7 +45,19 @@ class MainActivity : AppCompatActivity() {
             listDataManager.saveLists(list)
             adapter.addList(list)
             dialog.dismiss()
+            showTaskListItems(list)
         }
         builder.create().show()
+    }
+
+    private fun showTaskListItems(list: TaskList) {
+        val intent = Intent(this, DetailActivity::class.java).apply {
+            putExtra(INTENT_LIST_KEY, list)
+        }
+        startActivity(intent)
+    }
+
+    override fun listItemClicked(list: TaskList) {
+        showTaskListItems(list)
     }
 }
