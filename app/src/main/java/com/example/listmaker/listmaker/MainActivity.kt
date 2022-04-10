@@ -31,6 +31,22 @@ class MainActivity : AppCompatActivity(), TodoListAdapter.TodoListClickListener 
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE) {
+            data?.let {
+                val list = data.getParcelableExtra<TaskList>(INTENT_LIST_KEY)!!
+                listDataManager.saveLists(list)
+                updateLists()
+            }
+        }
+    }
+
+    private fun updateLists() {
+        val lists = listDataManager.readLists()
+        todoListRecyclerView.adapter = TodoListAdapter(lists, this)
+    }
+
     private fun showCreateTodoListDialog() {
         val adapter = todoListRecyclerView.adapter as TodoListAdapter
         val builder = AlertDialog.Builder(this)
@@ -54,7 +70,7 @@ class MainActivity : AppCompatActivity(), TodoListAdapter.TodoListClickListener 
         val intent = Intent(this, DetailActivity::class.java).apply {
             putExtra(INTENT_LIST_KEY, list)
         }
-        startActivity(intent)
+        startActivityForResult(intent, REQUEST_CODE)
     }
 
     override fun listItemClicked(list: TaskList) {
