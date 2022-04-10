@@ -10,21 +10,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.listmaker.listmaker.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity(), TodoListAdapter.TodoListClickListener {
+class MainActivity : AppCompatActivity(), TodoListFragment.OnFragmentInteractionListener {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var todoListRecyclerView: RecyclerView
-    private val listDataManager = ListDataManager(this)
+    private val todoListAdapter = TodoListFragment.newInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        val lists = listDataManager.readLists()
-        todoListRecyclerView = findViewById(R.id.rvTodoList)
-        todoListRecyclerView.layoutManager = LinearLayoutManager(this)
-        todoListRecyclerView.adapter = TodoListAdapter(lists, this)
 
         binding.fabCreate.setOnClickListener {
             showCreateTodoListDialog()
@@ -36,19 +30,12 @@ class MainActivity : AppCompatActivity(), TodoListAdapter.TodoListClickListener 
         if (requestCode == REQUEST_CODE) {
             data?.let {
                 val list = data.getParcelableExtra<TaskList>(INTENT_LIST_KEY)!!
-                listDataManager.saveLists(list)
-                updateLists()
+                todoListAdapter.saveList(list)
             }
         }
     }
 
-    private fun updateLists() {
-        val lists = listDataManager.readLists()
-        todoListRecyclerView.adapter = TodoListAdapter(lists, this)
-    }
-
     private fun showCreateTodoListDialog() {
-        val adapter = todoListRecyclerView.adapter as TodoListAdapter
         val builder = AlertDialog.Builder(this)
         val todoTitleEditText = EditText(this)
         todoTitleEditText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS
@@ -58,8 +45,7 @@ class MainActivity : AppCompatActivity(), TodoListAdapter.TodoListClickListener 
         builder.setPositiveButton(getString(R.string.create_list)) {
                 dialog, _ ->
             val list = TaskList(todoTitleEditText.text.toString())
-            listDataManager.saveLists(list)
-            adapter.addList(list)
+            todoListAdapter.addList(list)
             dialog.dismiss()
             showTaskListItems(list)
         }
@@ -73,7 +59,7 @@ class MainActivity : AppCompatActivity(), TodoListAdapter.TodoListClickListener 
         startActivityForResult(intent, REQUEST_CODE)
     }
 
-    override fun listItemClicked(list: TaskList) {
+    override fun onTodoListClicked(list: TaskList) {
         showTaskListItems(list)
     }
 }
