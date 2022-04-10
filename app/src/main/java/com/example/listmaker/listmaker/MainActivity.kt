@@ -6,14 +6,12 @@ import android.text.InputType
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.listmaker.listmaker.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), TodoListFragment.OnFragmentInteractionListener {
 
     private lateinit var binding: ActivityMainBinding
-    private val todoListAdapter = TodoListFragment.newInstance()
+    private val todoListFragment = TodoListFragment.newInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,6 +21,10 @@ class MainActivity : AppCompatActivity(), TodoListFragment.OnFragmentInteraction
         binding.fabCreate.setOnClickListener {
             showCreateTodoListDialog()
         }
+
+        supportFragmentManager.beginTransaction()
+            .add(R.id.fragment_container, todoListFragment)
+            .commit()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -30,7 +32,7 @@ class MainActivity : AppCompatActivity(), TodoListFragment.OnFragmentInteraction
         if (requestCode == REQUEST_CODE) {
             data?.let {
                 val list = data.getParcelableExtra<TaskList>(INTENT_LIST_KEY)!!
-                todoListAdapter.saveList(list)
+                todoListFragment.saveList(list)
             }
         }
     }
@@ -45,7 +47,7 @@ class MainActivity : AppCompatActivity(), TodoListFragment.OnFragmentInteraction
         builder.setPositiveButton(getString(R.string.create_list)) {
                 dialog, _ ->
             val list = TaskList(todoTitleEditText.text.toString())
-            todoListAdapter.addList(list)
+            todoListFragment.addList(list)
             dialog.dismiss()
             showTaskListItems(list)
         }
