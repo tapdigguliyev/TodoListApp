@@ -2,6 +2,7 @@ package com.example.listmaker.listmaker
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.Navigation
 import com.example.listmaker.listmaker.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -12,5 +13,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        Navigation.findNavController(this, R.id.nav_host_fragment)
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        binding.toolbar.title = getString(R.string.app_name)
     }
 }

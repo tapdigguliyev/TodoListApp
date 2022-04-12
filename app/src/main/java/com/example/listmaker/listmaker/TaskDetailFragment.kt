@@ -6,8 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import androidx.appcompat.widget.Toolbar
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.listmaker.listmaker.databinding.FragmentTaskDetailBinding
@@ -15,16 +17,9 @@ import com.example.listmaker.listmaker.databinding.FragmentTaskDetailBinding
 class TaskDetailFragment : Fragment() {
 
     private lateinit var binding: FragmentTaskDetailBinding
-
     private lateinit var list: TaskList
     private lateinit var taskListRecyclerView: RecyclerView
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            list = it.getParcelable(ARG_LIST)!!
-        }
-    }
+    private lateinit var listDataManager: ListDataManager
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,14 +31,25 @@ class TaskDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        listDataManager = ViewModelProviders.of(this).get(ListDataManager::class.java)
+
+        arguments?.let {
+            val args = TaskDetailFragmentArgs.fromBundle(it)
+            list = listDataManager.readLists().filter { list -> list.name == args.listString }[0] //wtf is going on here
+        }
+
         activity?.let {
             taskListRecyclerView = binding.rvTaskList
             taskListRecyclerView.layoutManager = LinearLayoutManager(it)
             taskListRecyclerView.adapter = TaskListAdapter(list)
-        }
 
-        binding.fabAdd.setOnClickListener {
-            showCreateTaskListDialog()
+            val toolbar = it.findViewById<Toolbar>(R.id.toolbar)
+            toolbar.title = list.name
+
+            binding.fabAdd.setOnClickListener {
+                showCreateTaskListDialog()
+            }
         }
     }
 
@@ -59,19 +65,10 @@ class TaskDetailFragment : Fragment() {
                         dialog, _ ->
                     val task = taskListEditText.text.toString()
                     list.tasks.add(task)
+                    listDataManager.saveLists(list)
                     dialog.dismiss()
                 }
                 .create().show()
-        }
-    }
-
-    companion object {
-        fun newInstance(list: TaskList) : TaskDetailFragment {
-            val bundle = Bundle()
-            bundle.putParcelable(ARG_LIST, list)
-            val fragment = TaskDetailFragment()
-            fragment.arguments = bundle
-            return fragment
         }
     }
 }

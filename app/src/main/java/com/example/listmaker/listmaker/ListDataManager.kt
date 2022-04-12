@@ -1,9 +1,11 @@
 package com.example.listmaker.listmaker
 
-import android.content.Context
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.preference.PreferenceManager
 
-class ListDataManager(private val context: Context) {
+class ListDataManager(application: Application) : AndroidViewModel(application) {
+    private val context = application.applicationContext
 
     fun saveLists(list: TaskList) {
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context).edit()
