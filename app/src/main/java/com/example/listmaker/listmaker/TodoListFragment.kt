@@ -1,11 +1,13 @@
 package com.example.listmaker.listmaker
 
-import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.listmaker.listmaker.databinding.FragmentTodoListBinding
@@ -13,8 +15,6 @@ import com.example.listmaker.listmaker.databinding.FragmentTodoListBinding
 class TodoListFragment : Fragment(), TodoListAdapter.TodoListClickListener {
 
     private lateinit var binding: FragmentTodoListBinding
-    private var listener: OnFragmentInteractionListener? = null
-
     private lateinit var todoListRecyclerView: RecyclerView
     private lateinit var listDataManager: ListDataManager
 
@@ -28,17 +28,18 @@ class TodoListFragment : Fragment(), TodoListAdapter.TodoListClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val lists = listDataManager.readLists()
+
+        activity?.let {
+            listDataManager = ListDataManager(it)
+        }
+
+        val lists = listDataManager.readLists()  //listDataManager has to be initialized before this line, as it is above, to remove not initialized error
         todoListRecyclerView = view.findViewById(R.id.rvTodoList)
         todoListRecyclerView.layoutManager = LinearLayoutManager(context)
         todoListRecyclerView.adapter = TodoListAdapter(lists, this)
-    }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if (context is OnFragmentInteractionListener) {
-            listener = context
-            listDataManager = ListDataManager(context)
+        binding.fabCreate.setOnClickListener {
+            showCreateTodoListDialog()
         }
     }
 
@@ -52,7 +53,7 @@ class TodoListFragment : Fragment(), TodoListAdapter.TodoListClickListener {
         fun onTodoListClicked (list: TaskList)
     }
 
-    fun addList(list: TaskList) {
+    private fun addList(list: TaskList) {
         listDataManager.saveLists(list)
         val adapter = todoListRecyclerView.adapter as TodoListAdapter
         adapter.addList(list)
@@ -68,7 +69,26 @@ class TodoListFragment : Fragment(), TodoListAdapter.TodoListClickListener {
         todoListRecyclerView.adapter = TodoListAdapter(lists, this)
     }
 
-    override fun listItemClicked(list: TaskList) {
-        listener?.onTodoListClicked(list)
+    private fun showCreateTodoListDialog() {
+        activity?.let {
+            val builder = AlertDialog.Builder(it)
+            val todoTitleEditText = EditText(it)
+            todoTitleEditText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS
+
+            builder.setTitle(getString(R.string.name_of_list))
+            builder.setView(todoTitleEditText)
+            builder.setPositiveButton(getString(R.string.create_list)) {
+                    dialog, _ ->
+                val list = TaskList(todoTitleEditText.text.toString())
+                addList(list)
+                dialog.dismiss()
+                showTaskListItems(list)
+            }
+            builder.create().show()
+        }
+    }
+
+    private fun showTaskListItems(list: TaskList) {
+
     }
 }
