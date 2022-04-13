@@ -9,11 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 class TodoListAdapter(private val lists: ArrayList<TaskList>, private val clickListener: TodoListClickListener) : RecyclerView.Adapter<TodoListAdapter.TodoListViewHolder>() {
 
     interface TodoListClickListener {
-        fun listItemClicked(list: TaskList){
+        fun listItemClicked(list: TaskList) {
 
         }
     }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoListViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.todo_list_view_holder, parent, false)
@@ -38,5 +37,10 @@ class TodoListAdapter(private val lists: ArrayList<TaskList>, private val clickL
     fun addList(list: TaskList) {
         lists.add(list)
         notifyItemInserted(lists.size - 1)
+    }
+
+    fun removeListAt(position: Int) {
+        lists.removeAt(position)
+        notifyItemRemoved(position)
     }
 }

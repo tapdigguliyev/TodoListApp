@@ -19,6 +19,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
-        binding.toolbar.title = getString(R.string.app_name)
+        setToolbarTitle(getString(R.string.app_name))
+    }
+
+    fun setToolbarTitle(name: String) {
+        binding.toolbar.title = name
     }
 }

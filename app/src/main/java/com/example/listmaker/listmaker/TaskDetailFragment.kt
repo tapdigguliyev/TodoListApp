@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import androidx.appcompat.widget.Toolbar
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
@@ -44,8 +43,7 @@ class TaskDetailFragment : Fragment() {
             taskListRecyclerView.layoutManager = LinearLayoutManager(it)
             taskListRecyclerView.adapter = TaskListAdapter(list)
 
-            val toolbar = it.findViewById<Toolbar>(R.id.toolbar)
-            toolbar.title = list.name
+            (activity as MainActivity).setToolbarTitle(list.name)
 
             binding.fabAdd.setOnClickListener {
                 showCreateTaskListDialog()

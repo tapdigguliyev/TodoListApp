@@ -10,6 +10,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.listmaker.listmaker.databinding.FragmentTodoListBinding
@@ -35,10 +36,27 @@ class TodoListFragment : Fragment(), TodoListAdapter.TodoListClickListener {
             listDataManager = ViewModelProviders.of(this).get(ListDataManager::class.java)
         }
 
-        val lists = listDataManager.readLists()  //listDataManager has to be initialized before this line, as it is above, to remove not initialized error
+        val lists = listDataManager.readLists()
         todoListRecyclerView = view.findViewById(R.id.rvTodoList)
         todoListRecyclerView.layoutManager = LinearLayoutManager(context)
         todoListRecyclerView.adapter = TodoListAdapter(lists, this)
+
+        activity?.let {
+            val swipeHandler = object : SwipeToDeleteCallback(it) {
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    val todoListAdapter = todoListRecyclerView.adapter as TodoListAdapter
+                    val position = viewHolder.adapterPosition
+                    val lists = listDataManager.readLists()
+                    val list = lists[position]
+
+                    todoListAdapter.removeListAt(position)
+                    listDataManager.deleteLists(list)
+                    updateLists()
+                }
+            }
+            val itemTouchHelper = ItemTouchHelper(swipeHandler)
+            itemTouchHelper.attachToRecyclerView(todoListRecyclerView)
+        }
 
         binding.fabCreate.setOnClickListener {
             showCreateTodoListDialog()
@@ -79,5 +97,10 @@ class TodoListFragment : Fragment(), TodoListAdapter.TodoListClickListener {
             val action = TodoListFragmentDirections.actionTodoListFragmentToTaskDetailFragment(list.name)
             it.findNavController().navigate(action)
         }
+    }
+
+    private fun updateLists() {
+        val lists = listDataManager.readLists()
+        todoListRecyclerView.adapter = TodoListAdapter(lists, this)
     }
 }
